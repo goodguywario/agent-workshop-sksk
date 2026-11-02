@@ -131,6 +131,6 @@ If your opencode version doesn't list them, add this provider to `opencode.json`
 ## Troubleshooting
 
 - **The web app says it can't reach the API.** `npm run dev` isn't running, or port 3001 or 5173 is taken. Stop the other process, or set `PORT=3002 npm run dev` and update the proxy in `vite.config.ts`.
-- **Agents say they have no `party_*` tools.** Run `opencode mcp list`. A new server shows `pending` for a few seconds and then `connected`. If it stays disconnected, run `npx tsx src/mcp/server.ts` to see the error.
+- **Agents say they have no `party_*` tools.** Run `opencode mcp list` from the repo folder. The first call in a fresh clone may say "No MCP servers configured", and a new server shows `pending` for a few seconds; run it again and it should say `connected`. If it stays disconnected, run `npx tsx src/mcp/server.ts` to see the error.
 - **`node:sqlite` errors.** Your Node.js is older than 22.5. Upgrade it.
 - **The plan looks stale.** The web app polls every 2 seconds. If a run was interrupted, `npm run plan:reset` and run again.
