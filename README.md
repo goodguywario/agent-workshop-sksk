@@ -19,7 +19,7 @@ The sub-agents read and write the party through an MCP server. A web app shows t
 
 You need:
 
-- Node.js 22.5 or newer (`node --version`)
+- Node.js 22.13 or newer (`node --version`)
 - [opencode](https://opencode.ai/docs/) installed
 - an [OpenRouter](https://openrouter.ai) API key
 
@@ -132,5 +132,5 @@ If your opencode version doesn't list them, add this provider to `opencode.json`
 
 - **The web app says it can't reach the API.** `npm run dev` isn't running, or port 3001 or 5173 is taken. Stop the other process, or set `PORT=3002 npm run dev` and update the proxy in `vite.config.ts`.
 - **Agents say they have no `party_*` tools.** Run `opencode mcp list` from the repo folder. The first call in a fresh clone may say "No MCP servers configured", and a new server shows `pending` for a few seconds; run it again and it should say `connected`. If it stays disconnected, run `npx tsx src/mcp/server.ts` to see the error.
-- **`node:sqlite` errors.** Your Node.js is older than 22.5. Upgrade it.
+- **`node:sqlite` errors.** Your Node.js is older than 22.13. Upgrade it.
 - **The plan looks stale.** The web app polls every 2 seconds. If a run was interrupted, `npm run plan:reset` and run again.

@@ -17,7 +17,9 @@ export class ValidationError extends Error {
 
 type Row = Record<string, unknown>;
 
-function transaction<T>(db: DatabaseSync, fn: () => T): T {
+/** Runs `fn` in a write transaction, or inside the caller's if one is already open. */
+export function transaction<T>(db: DatabaseSync, fn: () => T): T {
+  if (db.isTransaction) return fn();
   db.exec('BEGIN IMMEDIATE');
   try {
     const result = fn();
