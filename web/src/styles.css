@@ -69,6 +69,7 @@ a { color: inherit; }
 /* --- shell --- */
 
 .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.shell > * { min-width: 0; }
 
 .sidebar {
   background: var(--pine-soft);
@@ -162,7 +163,7 @@ a { color: inherit; }
 
 /* --- guests --- */
 
-.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
+.table-wrap { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 .guest-table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
 .guest-table th { text-align: left; font-size: 0.85rem; color: var(--muted); padding: 12px; border-bottom: 1px solid var(--line); }
 .guest-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
@@ -204,17 +205,20 @@ a { color: inherit; }
 .seating-svg { width: 100%; height: auto; display: block; }
 .table-shape { fill: none; stroke: var(--surface-sunk); stroke-linecap: round; }
 .table-edge { fill: none; stroke: var(--line); stroke-linecap: round; }
-.seat circle { fill: var(--frost); stroke: var(--pine-soft); stroke-width: 2; }
-.seat text { fill: var(--pine); font: 700 13px var(--font-body); text-anchor: middle; }
+.seat-ring { fill: var(--frost); stroke: var(--pine-soft); stroke-width: 2; }
+.seat text { fill: var(--pine); font: 700 13px var(--font-body); }
+.seat .seat-initials, .seat .seat-number { text-anchor: middle; }
 .seat .seat-number { fill: var(--muted); font-weight: 400; font-size: 11px; }
-.seat.is-middle circle { stroke: var(--brass); stroke-width: 4; fill: var(--brass-soft); }
+.seat.is-middle .seat-ring { stroke: var(--brass); stroke-width: 4; fill: var(--brass-soft); }
 .seat.is-boss .seat-initials { fill: var(--brass); }
-.seat.is-declined circle { stroke: var(--cranberry); stroke-width: 4; fill: var(--cranberry-soft); }
-.seat.is-pending circle { stroke: var(--amber); stroke-width: 4; fill: var(--amber-soft); }
-.seat.is-empty circle { stroke-dasharray: 5 4; stroke: var(--muted); fill: none; }
+.seat.is-declined .seat-ring { stroke: var(--cranberry); stroke-width: 4; fill: var(--cranberry-soft); }
+.seat.is-pending .seat-ring { stroke: var(--amber); stroke-width: 4; fill: var(--amber-soft); }
+.seat.is-empty .seat-ring { stroke-dasharray: 5 4; stroke: var(--muted); fill: none; }
 .seat .diet-dot { fill: var(--ok); stroke: var(--surface); stroke-width: 2; }
 .partner-link { stroke: var(--cranberry); stroke-width: 3; stroke-linecap: round; opacity: 0.7; }
-.seat-status { fill: var(--cranberry); font-size: 11px; }
+.seat .seat-status { fill: var(--cranberry); font-size: 12px; }
+.seat.is-pending .seat-status { fill: var(--amber); }
+.legend-line { display: inline-block; width: 18px; height: 3px; background: var(--cranberry); opacity: 0.7; margin-right: 6px; vertical-align: 3px; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 16px 0 0; padding: 0; list-style: none; font-size: 0.9rem; color: var(--muted); }
 .legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; border: 2px solid; }
