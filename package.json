@@ -7,7 +7,9 @@
     "node": ">=22.5"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:reset": "tsx scripts/db-reset.ts",
+    "plan:reset": "tsx scripts/plan-reset.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
