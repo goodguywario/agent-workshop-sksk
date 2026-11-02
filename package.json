@@ -1,0 +1,34 @@
+{
+  "name": "christmas-party-planner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "db:reset": "tsx scripts/db-reset.ts",
+    "plan:reset": "tsx scripts/plan-reset.ts",
+    "api": "tsx watch src/api/server.ts",
+    "dev": "concurrently -n api,web -c green,red \"npm:api\" \"vite\"",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^10.0.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
