@@ -18,7 +18,7 @@ Plan for guests whose RSVP is `attending`. For each `pending` guest with an alle
 ## Menu rules
 
 1. **Severe means kitchen-wide.** A severe allergen appears in no dish at all, including garnishes, desserts and drinks.
-2. **Every guest, every course.** Each attending guest has at least one dish they can safely eat in every course (starter, main, dessert, drinks), respecting both allergies and diet (vegan, vegetarian, pescatarian).
+2. **Every guest, every course.** Each attending guest has at least one dish they can safely eat in every course (starter, main, dessert, drinks), respecting both allergies and diet (vegan, vegetarian, pescatarian). Mild intolerances ("a little is ok") count too: those guests get a fully free option in every course, even though the allergen stays elsewhere on the menu.
 3. **Alternatives say who they are for.** When a dish exists for specific guests, its `notes` name them ("Vegan and nut-free: for Lena").
 4. **Label with the EU 14.** List allergens on every item using exactly these names: celery, cereals containing gluten, crustaceans, eggs, fish, lupin, milk, molluscs, mustard, tree nuts, peanuts, sesame, soya, sulphites. An item with none has an empty list.
 5. **Dietary tags** use: vegan, vegetarian, pescatarian, gluten-free, lactose-free.

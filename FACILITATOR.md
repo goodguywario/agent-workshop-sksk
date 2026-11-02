@@ -33,7 +33,7 @@ Each trap maps to a rule that the reference agents and skills handle and the sta
 
 ## House rules, in brief
 
-- **Seating:** only attending guests; boss in seat ceil(N/2) with partner beside; couples adjacent; tips (seats 1 and N) go to couples; accessibility guest at a tip; new hire beside buddy; honour "don't seat me next to"; mix departments.
+- **Seating:** only attending guests; boss in seat ceil(N/2) with partner beside; couples adjacent; tips (seats 1 and N) go to couples, singles ideally beside another single; accessibility guest at a tip; new hire beside buddy; honour "don't seat me next to"; mix departments.
 - **Menu:** severe allergens are banned kitchen-wide; every attending guest has a safe option in every course; allergens are labelled with the EU 14; alternatives name who they're for; pending guests get a note and declined guests are ignored.
 - **Christmas:** Mariah's "All I Want For Christmas Is You" is the last track; no Wham! "Last Christmas"; 20–30 tracks; a traditional roast; mulled wine plus an alcohol-free version; rice pudding with a nut-free token when someone has a severe nut allergy.
 - **Invitation:** plain text; subject ≤ 60 chars; date and time, venue and address, dress code, RSVP deadline; asks about dietary needs and partners; signed by the boss with her title.

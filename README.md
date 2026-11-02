@@ -115,16 +115,14 @@ The same agents and skills behave differently on less capable models. To see how
 3. In LM Studio's **Developer** tab, start the server on port 1234.
 4. Restart opencode. Its built-in `lmstudio` provider picks up the loaded models, and they appear under `/models` as `lmstudio/<model>`.
 
-If your opencode version doesn't list them, add this provider to `opencode.json`:
+If your opencode version doesn't list them, add an `lmstudio` entry **inside the existing `provider` block** of `opencode.json`, next to `openrouter`:
 
 ```json
-"provider": {
-  "lmstudio": {
-    "npm": "@ai-sdk/openai-compatible",
-    "name": "LM Studio (local)",
-    "options": { "baseURL": "http://127.0.0.1:1234/v1" },
-    "models": { "openai/gpt-oss-20b": {} }
-  }
+"lmstudio": {
+  "npm": "@ai-sdk/openai-compatible",
+  "name": "LM Studio (local)",
+  "options": { "baseURL": "http://127.0.0.1:1234/v1" },
+  "models": { "openai/gpt-oss-20b": {} }
 }
 ```
 

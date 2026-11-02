@@ -19,7 +19,13 @@ export function Settings() {
   const [form, setForm] = useState<PartyEvent>();
   const [status, setStatus] = useState<{ kind: 'saved' | 'error'; text: string }>();
 
-  useEffect(() => { api.getEvent().then(setForm); }, []);
+  // Retries until the API answers: on `npm run dev` the web app is often up before the API.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const load = () => api.getEvent().then(setForm, () => { timer = setTimeout(load, 1000); });
+    load();
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!form) return <p className="loading">Loading settings…</p>;
 

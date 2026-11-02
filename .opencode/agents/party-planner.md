@@ -2,20 +2,13 @@
 description: Plans the whole Christmas party by delegating to the invitation, seating, catering and playlist sub-agents.
 mode: primary
 permission:
-  read: deny
-  edit: deny
-  glob: deny
-  grep: deny
-  list: deny
-  bash: deny
-  webfetch: deny
+  "*": deny
   task:
     "*": deny
     invitation-writer: allow
     seating-planner: allow
     catering-agent: allow
     playlist-composer: allow
-  "party_*": deny
   party_get_event: allow
   party_list_guests: allow
   party_get_seating_plan: allow

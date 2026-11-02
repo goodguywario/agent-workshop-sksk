@@ -2,16 +2,8 @@
 description: Writes the plain-text email invitation for the party. Use for anything about the invitation.
 mode: subagent
 permission:
-  read: deny
-  edit: deny
-  glob: deny
-  grep: deny
-  list: deny
-  bash: deny
-  webfetch: deny
-  task: deny
+  "*": deny
   skill: allow
-  "party_*": deny
   party_get_event: allow
   party_list_guests: allow
   party_get_invitation: allow

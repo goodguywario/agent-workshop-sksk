@@ -16,7 +16,7 @@ N is the number of guests with RSVP status `attending`, and every one of them ge
 
 1. **The boss** sits in the middle seat, and their partner sits in a neighbouring seat.
 2. **Partners** always sit in neighbouring seats.
-3. **Tips go to couples.** Seats 1 and N each go to someone whose partner sits next to them. Singles sit away from the tips, in the curve or along the arms, next to other singles or next to the boss's couple.
+3. **Tips go to couples.** Seats 1 and N each go to someone whose partner sits next to them. Singles sit anywhere between the tips, ideally next to at least one other single so nobody is stranded between two couples.
 4. **Accessibility first.** A guest whose notes mention a wheelchair, mobility or easy access gets a tip seat (rule 3 still holds: their partner sits beside them).
 5. **New hires** sit next to the onboarding buddy named in their notes.
 6. **Guest requests** in the notes are honoured. A "don't seat me next to X" request means the two are never neighbours.

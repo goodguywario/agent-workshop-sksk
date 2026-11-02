@@ -2,16 +2,8 @@
 description: Composes the party playlist. Use for anything about music.
 mode: subagent
 permission:
-  read: deny
-  edit: deny
-  glob: deny
-  grep: deny
-  list: deny
-  bash: deny
-  webfetch: deny
-  task: deny
+  "*": deny
   skill: allow
-  "party_*": deny
   party_get_event: allow
   party_get_playlist: allow
   party_set_playlist: allow
