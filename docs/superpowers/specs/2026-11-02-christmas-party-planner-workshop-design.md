@@ -20,6 +20,7 @@ This repo is the hands-on material. It is a small Christmas-party-planning app. 
    - the seating planner places singles vs. couples sensibly
    - a Christmas theme always gets "All I Want For Christmas Is You"
 5. Show-and-tell: pairs show both their instruction diffs and what the planner generated.
+6. Model step-down: the same agents and skills are run against less capable models (cheaper OpenRouter models, and a model hosted locally in **LM Studio**) to watch the result get more jumbled.
 
 ## Goals
 
@@ -36,12 +37,13 @@ This repo is the hands-on material. It is a small Christmas-party-planning app. 
 - Authentication, multi-user, deployment, or hosting. Everything runs locally per participant.
 - Multiple events. There is exactly one event.
 - Slides or a timed agenda for the day.
-- Supporting weak or cheap models. The tool surface may assume a frontier model.
+- Making weak models *succeed*. The tool surface is designed for frontier models, and degraded output on weaker models is the point of the final segment. Weaker models must still be able to *run* the flow, though (see Model and provider).
 
 ## Anti-goals (would make it a failure even if it "works")
 
 - **Install friction.** Native module builds, global installs, Docker, or per-machine config steps would eat the morning.
 - **The server enforcing taste.** If the MCP server enforced "boss in the middle", "couples together" or "no nuts for the nut-allergic guest", there would be nothing left for agents to learn. The server rejects only *broken data*: unknown IDs, duplicates and malformed input. Good judgement lives only in instructions. This boundary should be stated explicitly in code comments and the README, because it is a teaching point.
+- **Traps a frontier model fixes unprompted.** Decided with Mario: the main traps are **house rules**, conventions no model can infer from the data. Examples: the boss sits in the middle seat; Mariah is mandatory at Christmas; the company's policy for singles vs. couples; invitations must ask for allergies by the RSVP deadline; tracks/dishes the company always or never wants. Safety traps (allergies, declined guests) stay in the seed. If the starter sometimes handles them, that is a talking point rather than a failure. The message of the day: the model brings competence, and skills bring *your organisation's* conventions. Starter agent files are generic but honest. They are not deliberately sabotaged.
 - **A starter so weak it fails outright.** If the starter crashes, refuses, or writes nothing, the "make it better" arc is lost. It must produce complete, mediocre output.
 - **A reference that leaks into the starter.** Participants should not find the answers in the starter branch.
 
@@ -97,6 +99,7 @@ One event row. Lists such as allergens are stored as JSON-array text where neede
 
 **seat_assignments**
 - seat number (1..N), guest_id (unique, FK → guests, `ON DELETE CASCADE`)
+- **Seat count (builder's call):** N = length of the list submitted to `set_seating_plan`. There is no fixed table size. The middle seat is defined as seat `ceil(N/2)`; the reference skill states this, and the frontend highlights that seat. If a guest is later removed, their seat stays as a visible empty gap. Nothing is renumbered, so the gap is obvious until the planner is re-run.
 - **Decision:** a table, not a JSON string. A JSON string silently keeps dangling guest IDs when a guest is removed in the guest view. The table clears that seat automatically. The agent never sees storage either way.
 
 **menu_items**
@@ -172,7 +175,7 @@ Each sub-agent is granted only the MCP tools it needs. That demonstrates least p
 
 ### Two branches
 
-- **`main` = reference.** Full, well-crafted agents and skills that handle every seeded trap. Mario demos this up front and uses it as a fallback for stuck pairs. *(Builder's call: `main` as reference, `starter` as a separate branch. Participants clone with `git clone -b starter`, and the README states that prominently.)*
+- **`main` = reference.** Full, well-crafted agents and skills that handle every seeded trap. Mario demos this up front and uses it as a fallback for stuck pairs. *(Builder's call: `main` as reference, `starter` as a separate branch. Participants clone with `git clone -b starter --single-branch`, and the README states that prominently. The reference stays reachable for anyone who goes looking; that's acceptable, since it doubles as the fallback for stuck pairs.)*
 - **`starter` = thin.** Same code, same seed, same file names. Agents are a few generic lines each, and skill files exist but are vague stubs. That way the agent/skill split is visible from the start, and pairs improve files rather than invent the structure. The starter must still produce complete output in every view.
 - The branches differ **only** in `.opencode/agent/`, `.opencode/skill/` and `.opencode/command/` (if needed). Code fixes must land on both.
 
@@ -196,7 +199,7 @@ Required traps (each one maps to a rule the reference handles and the starter mi
   - one preference that is *not* an allergy ("doesn't like spicy food")
 - **Two guests who must not sit next to each other.** The hint lives in a guest's notes field.
 - **A wheelchair user** who needs an end seat at a horseshoe tip, stated in notes.
-- **RSVP mix:** about 2 declined and 2 pending. Neither group should be seated or catered for as confirmed.
+- **RSVP mix:** about 2 declined and 2 pending. *(Builder's call:)* the reference seats only `attending` guests and caters for attending guests' needs. The catering agent mentions pending guests' allergies in a menu note ("if X confirms…"). The seating view flags a declined guest in a seat as an error and a pending guest as a warning.
 
 A short facilitator-only file (`FACILITATOR.md`, on `main` only) lists every trap and which agent or skill handles it in the reference. *(Builder's call.)*
 
@@ -204,6 +207,9 @@ A short facilitator-only file (`FACILITATOR.md`, on `main` only) lists every tra
 
 - The README explains OpenRouter setup for opencode, including the API key and selecting a frontier model.
 - `opencode.json` may set a default model. **The builder must verify current OpenRouter model IDs** at build time rather than hard-coding from memory.
+- `opencode.json` also ships a ready-made **LM Studio provider** (OpenAI-compatible endpoint on `http://localhost:1234/v1`). The README has a short section on loading a tool-calling-capable model in LM Studio and switching opencode to it. **The builder must verify** the current opencode syntax for custom OpenAI-compatible providers.
+- The README suggests one or two cheaper OpenRouter models for the step-down segment *(builder's call which)*.
+- Because weaker models will be used, MCP tool schemas stay simple: flat arguments where possible, small enums, no deeply nested optional structures. Error messages say exactly what to fix, so a weak model's failures show up as *jumbled plans* rather than a dead tool loop.
 
 ## Verification
 
@@ -213,6 +219,7 @@ A short facilitator-only file (`FACILITATOR.md`, on `main` only) lists every tra
   - the starter shows naive-but-complete output, and the reference visibly handles every trap
   - this needs Mario's OpenRouter key in opencode
 - A cold-install check from a clean clone, so no hidden local state is relied on.
+- A smoke run of `/plan-party` through the LM Studio provider config. This only checks that the wiring connects, not output quality, and it needs LM Studio running on Mario's machine.
 
 ## Left to the builder
 
