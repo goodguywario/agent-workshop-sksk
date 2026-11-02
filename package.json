@@ -9,7 +9,9 @@
   "scripts": {
     "test": "vitest run",
     "db:reset": "tsx scripts/db-reset.ts",
-    "plan:reset": "tsx scripts/plan-reset.ts"
+    "plan:reset": "tsx scripts/plan-reset.ts",
+    "api": "tsx watch src/api/server.ts",
+    "dev": "concurrently -n api,web -c green,red \"npm:api\" \"vite\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
