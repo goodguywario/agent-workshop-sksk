@@ -71,6 +71,40 @@ Run `npm run plan:reset`, then `/plan-party`, then check:
 - [ ] Playlist: 20–30 tracks, Mariah last, no "Last Christmas"
 - [ ] Invitation: plain text, every detail present, asks about allergies by 27 November, signed by Margaret Holloway, CEO
 
-## What the starter typically catches
+`npm run check:rules` grades the current plan against all 44 checks in this list. It exists only on `main`.
 
-*(Filled in after test runs of the starter branch.)*
+## Test runs (2026-11-02, Claude Opus 5.5)
+
+| Branch | Run 1 | Run 2 |
+|---|---|---|
+| `main` (reference) | 44/44 | 44/44 |
+| `starter` | 35/44 | 34/44 |
+
+### What the starter typically catches
+
+A frontier model handles a lot without being told. That's a good opening for the "the model brings competence, skills bring your conventions" discussion.
+
+- **Safety, all of it.**
+  - The menu is nut-free.
+  - Every course has gluten-free, milk-free, vegan and shellfish-free options.
+  - Declined guests are ignored.
+- **Most of the seating.**
+  - Only attending guests are seated.
+  - Couples sit together.
+  - Daniel is at a tip, Oliver is beside Aisha, and Ben and Gary are apart.
+  - The boss is in the middle seat, which surprised us. Opus inferred it from etiquette, so expect pairs to find it already "working".
+- **Most of the invitation details.** Date, venue, dress code and the allergy question are all there.
+
+### What the starter misses (the work for the pairs)
+
+- **Playlist:** 114 tracks (in one run), Wham!'s "Last Christmas" included, and Mariah at track 61 instead of last.
+- **Invitation:**
+  - signed "[ORGANISER NAME]" instead of Margaret Holloway, CEO
+  - subject over 60 characters
+  - in one run, the time and RSVP date were missing
+- **Seating:** a single guest (Gary) ends up at a tip.
+- **Menu:**
+  - there's no note about pending Elena's sesame allergy
+  - the almond game is sometimes missing (run 1)
+
+Run-to-run variation is real. Run the starter twice before the workshop and use the worse run as your "before" demo.

@@ -12,7 +12,8 @@
     "plan:reset": "tsx scripts/plan-reset.ts",
     "api": "tsx watch src/api/server.ts",
     "dev": "concurrently -n api,web -c green,red \"npm:api\" \"vite\"",
-    "typecheck": "tsc --noEmit -p ."
+    "typecheck": "tsc --noEmit -p .",
+    "check:rules": "tsx scripts/check-house-rules.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
