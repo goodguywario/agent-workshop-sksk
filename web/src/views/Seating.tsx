@@ -22,6 +22,14 @@ function tablePath(): string {
   return `M ${left} ${topY} L ${left} ${cy} A ${inner} ${inner} 0 0 0 ${right} ${cy} L ${right} ${topY}`;
 }
 
+/** On narrow screens the table scrolls sideways; open it on the middle seat. */
+function centreScroll(el: HTMLDivElement | null) {
+  if (el && el.dataset.centred === undefined) {
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    el.dataset.centred = '';
+  }
+}
+
 export function Seating() {
   const { data } = usePoll(fetchSeating);
   if (!data) return <p className="loading">Loading seating…</p>;
@@ -52,48 +60,50 @@ export function Seating() {
 
       {plan.seatCount === 0 ? <EmptyState what="seating plan" /> : (
         <figure className="seating-figure">
-          <svg className="seating-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Horseshoe table with ${plan.seatCount} seats`}>
-            <path className="table-shape" d={tablePath()} strokeWidth={46} />
-            {partnerLinks.map(([a, b]) => {
-              const pa = positions[a - 1], pb = positions[b - 1];
-              const len = Math.hypot(pb.x - pa.x, pb.y - pa.y);
-              const ux = (pb.x - pa.x) / len, uy = (pb.y - pa.y) / len;
-              return <line key={a} className="partner-link"
-                x1={pa.x + ux * SEAT_R} y1={pa.y + uy * SEAT_R} x2={pb.x - ux * SEAT_R} y2={pb.y - uy * SEAT_R} />;
-            })}
-            {plan.seats.map((seat) => {
-              const pos = positions[seat.seatNumber - 1];
-              const g = seat.guestId !== null ? byId.get(seat.guestId) : undefined;
-              const out = { dx: -pos.inward.dx, dy: -pos.inward.dy };
-              const lx = pos.x + out.dx * (SEAT_R + 10), ly = pos.y + out.dy * (SEAT_R + 10);
-              const anchor = out.dx > 0.35 ? 'start' : out.dx < -0.35 ? 'end' : 'middle';
-              const baseline = out.dy > 0.35 ? 14 : out.dy < -0.35 ? -18 : 4;
-              const classes = ['seat',
-                seat.seatNumber === plan.middleSeat && 'is-middle',
-                !g && 'is-empty',
-                g?.isBoss && 'is-boss',
-                g && g.rsvpStatus !== 'attending' && `is-${g.rsvpStatus}`,
-              ].filter(Boolean).join(' ');
-              return (
-                <g key={seat.seatNumber} className={classes}>
-                  <title>{g ? `Seat ${seat.seatNumber}: ${g.firstName} ${g.lastName} (${g.rsvpStatus})` : `Seat ${seat.seatNumber}: empty`}</title>
-                  <circle className="seat-ring" cx={pos.x} cy={pos.y} r={SEAT_R} />
-                  {g ? (
-                    <>
-                      <text className="seat-initials" x={pos.x} y={pos.y + 5}>{initials(g)}</text>
-                      {hasDietaryNeeds(g) && <circle className="diet-dot" cx={pos.x + SEAT_R * 0.72} cy={pos.y - SEAT_R * 0.72} r={6} />}
-                      <text x={lx} y={ly + baseline} textAnchor={anchor}>
-                        {g.isBoss ? '★ ' : ''}{shortName(g)}
-                        {g.rsvpStatus !== 'attending' && <tspan className="seat-status" x={lx} dy={14}>{g.rsvpStatus}</tspan>}
-                      </text>
-                    </>
-                  ) : (
-                    <text className="seat-number" x={pos.x} y={pos.y + 4}>{seat.seatNumber}</text>
-                  )}
-                </g>
-              );
-            })}
-          </svg>
+          <div className="seating-scroll" ref={centreScroll}>
+            <svg className="seating-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Horseshoe table with ${plan.seatCount} seats`}>
+              <path className="table-shape" d={tablePath()} strokeWidth={46} />
+              {partnerLinks.map(([a, b]) => {
+                const pa = positions[a - 1], pb = positions[b - 1];
+                const len = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+                const ux = (pb.x - pa.x) / len, uy = (pb.y - pa.y) / len;
+                return <line key={a} className="partner-link"
+                  x1={pa.x + ux * SEAT_R} y1={pa.y + uy * SEAT_R} x2={pb.x - ux * SEAT_R} y2={pb.y - uy * SEAT_R} />;
+              })}
+              {plan.seats.map((seat) => {
+                const pos = positions[seat.seatNumber - 1];
+                const g = seat.guestId !== null ? byId.get(seat.guestId) : undefined;
+                const out = { dx: -pos.inward.dx, dy: -pos.inward.dy };
+                const lx = pos.x + out.dx * (SEAT_R + 10), ly = pos.y + out.dy * (SEAT_R + 10);
+                const anchor = out.dx > 0.35 ? 'start' : out.dx < -0.35 ? 'end' : 'middle';
+                const baseline = out.dy > 0.35 ? 14 : out.dy < -0.35 ? -18 : 4;
+                const classes = ['seat',
+                  seat.seatNumber === plan.middleSeat && 'is-middle',
+                  !g && 'is-empty',
+                  g?.isBoss && 'is-boss',
+                  g && g.rsvpStatus !== 'attending' && `is-${g.rsvpStatus}`,
+                ].filter(Boolean).join(' ');
+                return (
+                  <g key={seat.seatNumber} className={classes}>
+                    <title>{g ? `Seat ${seat.seatNumber}: ${g.firstName} ${g.lastName} (${g.rsvpStatus})` : `Seat ${seat.seatNumber}: empty`}</title>
+                    <circle className="seat-ring" cx={pos.x} cy={pos.y} r={SEAT_R} />
+                    {g ? (
+                      <>
+                        <text className="seat-initials" x={pos.x} y={pos.y + 5}>{initials(g)}</text>
+                        {hasDietaryNeeds(g) && <circle className="diet-dot" cx={pos.x + SEAT_R * 0.72} cy={pos.y - SEAT_R * 0.72} r={6} />}
+                        <text x={lx} y={ly + baseline} textAnchor={anchor}>
+                          {g.isBoss ? '★ ' : ''}{shortName(g)}
+                          {g.rsvpStatus !== 'attending' && <tspan className="seat-status" x={lx} dy={14}>{g.rsvpStatus}</tspan>}
+                        </text>
+                      </>
+                    ) : (
+                      <text className="seat-number" x={pos.x} y={pos.y + 4}>{seat.seatNumber}</text>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
           <ul className="legend">
             <li><span className="legend-swatch" style={{ borderColor: 'var(--brass)', background: 'var(--brass-soft)' }} />Middle seat</li>
             <li><span className="legend-swatch" style={{ borderColor: 'var(--ok)', background: 'var(--ok)' }} />Dietary needs</li>

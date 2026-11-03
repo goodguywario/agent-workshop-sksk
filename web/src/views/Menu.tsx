@@ -13,7 +13,7 @@ export function Menu() {
     <section>
       <header className="view-header">
         <h2>Menu</h2>
-        <p className="lede">Allergens are marked in red, dietary labels in green.</p>
+        <p className="lede">Each dish lists what it contains in red and which diets it suits in green.</p>
       </header>
       {menu.length === 0 ? <EmptyState what="menu" /> : (
         <div className="menu">
@@ -24,10 +24,18 @@ export function Menu() {
                 <div key={i} className="menu-item">
                   <div className="menu-item-name">{item.name}</div>
                   {item.description && <p>{item.description}</p>}
-                  <div>
-                    {item.allergens.map((a) => <span key={a} className="chip is-allergy">{a}</span>)}
-                    {item.dietaryTags.map((t) => <span key={t} className="chip is-diet">{t}</span>)}
-                  </div>
+                  {item.allergens.length > 0 && (
+                    <div className="chip-row">
+                      <span className="chip-label">Contains</span>
+                      {item.allergens.map((a) => <span key={a} className="chip is-allergy">{a}</span>)}
+                    </div>
+                  )}
+                  {item.dietaryTags.length > 0 && (
+                    <div className="chip-row">
+                      <span className="chip-label">Suits</span>
+                      {item.dietaryTags.map((t) => <span key={t} className="chip is-diet">{t}</span>)}
+                    </div>
+                  )}
                   {item.notes && <div className="menu-item-note">{item.notes}</div>}
                 </div>
               ))}

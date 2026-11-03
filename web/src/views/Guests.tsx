@@ -11,6 +11,12 @@ const BLANK: GuestInput = {
 const fullName = (g: Guest) => `${g.firstName} ${g.lastName}`;
 const withoutId = ({ id: _id, ...input }: Guest): GuestInput => input;
 
+/** Lets long addresses wrap before the @ instead of widening the table. */
+function breakableEmail(email: string) {
+  const at = email.indexOf('@');
+  return at > 0 ? <>{email.slice(0, at)}<wbr />{email.slice(at)}</> : email;
+}
+
 function GuestForm({ initial, guests, selfId, submitLabel, onSubmit, onCancel }: {
   initial: GuestInput;
   guests: Guest[];
@@ -84,7 +90,11 @@ export function Guests() {
 
   const remove = async (g: Guest) => {
     if (!window.confirm(`Remove ${fullName(g)} from the guest list?`)) return;
-    await api.removeGuest(g.id);
+    try {
+      await api.removeGuest(g.id);
+    } catch (err) {
+      window.alert(`Couldn't remove ${fullName(g)}: ${(err as Error).message}`);
+    }
     refresh();
   };
 
@@ -124,12 +134,12 @@ export function Guests() {
               <tr key={g.id}>
                 <td className="guest-name">
                   {fullName(g)}
-                  {g.isBoss && <span className="boss-mark" title="The boss"> ★</span>}
-                  <div className="cell-sub">{g.email}</div>
+                  {g.isBoss && <span className="boss-mark" title="The boss"> ★<span className="visually-hidden">The boss</span></span>}
+                  <div className="cell-sub">{breakableEmail(g.email)}</div>
                 </td>
                 <td>{g.jobTitle ?? <span className="muted">Plus-one</span>}<div className="cell-sub">{g.department}</div></td>
                 <td><span className={`rsvp rsvp-${g.rsvpStatus}`}>{g.rsvpStatus}</span></td>
-                <td>
+                <td className="diet-cell">
                   {g.dietaryPreference !== 'none' && <span className="chip">{g.dietaryPreference}</span>}
                   {g.allergies && <span className="chip is-allergy">{g.allergies}</span>}
                 </td>
