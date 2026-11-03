@@ -3,7 +3,9 @@ description: Composes the party playlist. Use for anything about music.
 mode: subagent
 permission:
   "*": deny
-  skill: allow
+  skill:
+    "*": deny
+    christmas-traditions: allow
   party_get_event: allow
   party_get_playlist: allow
   party_set_playlist: allow

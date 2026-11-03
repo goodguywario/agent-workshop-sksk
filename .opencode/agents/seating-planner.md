@@ -3,7 +3,9 @@ description: Seats the guests around the horseshoe table. Use for anything about
 mode: subagent
 permission:
   "*": deny
-  skill: allow
+  skill:
+    "*": deny
+    seating-etiquette: allow
   party_get_event: allow
   party_list_guests: allow
   party_get_seating_plan: allow
