@@ -44,6 +44,46 @@ Then, inside opencode:
 2. Run `/models` and choose `anthropic/claude-opus-5.5`, or another frontier model your facilitator suggests.
 3. Run `/plan-party` and watch the web app fill in.
 
+## Install the workshop skills
+
+These skills are installed globally (in `~/.agents/skills/`), so they're available in any project but stay out of this repo.
+
+```bash
+npx skills add obra/superpowers -g -a opencode -y -s brainstorming
+
+npx skills add mattpocock/skills -g -a opencode -y -s prototype -s writing-for-agents
+
+npx skills add github/awesome-copilot -g -a opencode -y -s prd
+
+npx skills add deanpeters/product-manager-skills -g -a opencode -y -s user-story -s storyboard
+```
+
+Restart opencode afterwards so it picks them up.
+
+| Skill | From | What it's for |
+|---|---|---|
+| `brainstorming` | Superpowers | Explores an idea with you, one question at a time, before anything gets built |
+| `prototype` | Matt Pocock | Builds throwaway versions of a page to compare |
+| `writing-for-agents` | Matt Pocock | How to write skills and agent instructions |
+| `prd` | GitHub | Writes a product requirements document |
+| `user-story` | Dean Peters | Writes user stories with testable acceptance criteria |
+| `storyboard` | Dean Peters | Tells a user's journey in six frames |
+
+## Spec a feature as a decision maker
+
+You don't need to write code to shape a feature. Describe what you want in your own words, and these commands use the skills above to turn it into something developers can build from:
+
+| Command | What you get |
+|---|---|
+| `/plan-feature <idea>` | A conversation that sharpens the idea, saved as `requests/<name>/idea.md` |
+| `/mockup <what to show>` | Three versions of the screen inside the running app, with real data |
+| `/spec <idea>` | A spec with user stories, acceptance criteria and a task list for the developers |
+| `/story-page <idea>` | An animated web page telling the user's story, in `requests/<name>/story.html` |
+
+For example: `/plan-feature We want a speech writer that turns a few bullet points we type in the app into a speech for the party.`
+
+The commands run on opencode's default `build` agent. The party-planning agents can't see these skills, so they never interfere with `/plan-party`.
+
 ## What's where
 
 ```
