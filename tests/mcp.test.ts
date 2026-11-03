@@ -29,9 +29,29 @@ describe('party MCP tools', () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'add_guest', 'clear_seating_plan', 'get_event', 'get_guest', 'get_invitation', 'get_menu',
-      'get_playlist', 'get_seating_plan', 'list_guests', 'remove_guest', 'set_invitation', 'set_menu',
-      'set_playlist', 'set_seating_plan', 'update_event', 'update_guest',
+      'get_playlist', 'get_seating_plan', 'get_speeches', 'list_guests', 'list_public_guests', 'remove_guest',
+      'set_invitation', 'set_menu', 'set_playlist', 'set_seating_plan', 'set_speech_text', 'update_event', 'update_guest',
     ]);
+  });
+
+  test('list_public_guests hides private fields and guests who are not coming', async () => {
+    const client = await connect();
+    const all = (await call(client, 'list_guests')).json();
+    const pub = (await call(client, 'list_public_guests')).json();
+    expect(pub).toHaveLength(all.filter((g: { rsvpStatus: string }) => g.rsvpStatus === 'attending').length);
+    const text = JSON.stringify(pub);
+    for (const secret of ['EpiPen', 'wheelchair', 'long story', 'Maggie', 'notes', 'allergies', 'email']) {
+      expect(text).not.toContain(secret);
+    }
+  });
+
+  test('set_speech_text writes a speech only while speeches are switched on', async () => {
+    const client = await connect();
+    const { enabled, speeches } = (await call(client, 'get_speeches')).json();
+    expect(enabled).toBe(false);
+    const off = await call(client, 'set_speech_text', { id: speeches[0].id, body: 'Skål!' });
+    expect(off.isError).toBe(true);
+    expect(off.text).toContain('speeches are switched off');
   });
 
   test('set_seating_plan with unknown id returns isError with the id in the message', async () => {

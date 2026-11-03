@@ -4,8 +4,10 @@
 // Do not add them here.
 
 import type { DatabaseSync } from 'node:sqlite';
-import type {
-  Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Track,
+import {
+  SPEECH_LENGTHS, SPEECH_ROLES, SPEECH_TONES,
+  type Guest, type GuestInput, type Invitation, type MenuItem, type PartyEvent, type PublicGuest, type SeatingPlan,
+  type Speech, type SpeechLength, type SpeechPlan, type SpeechRole, type SpeechSettings, type SpeechTone, type Track,
 } from './types.ts';
 
 export class ValidationError extends Error {
@@ -265,12 +267,164 @@ export function setInvitation(db: DatabaseSync, invitation: Invitation): Invitat
   return invitation;
 }
 
+// --- speeches --------------------------------------------------------------
+// The organiser owns the speech settings (web app); the speech writer only writes the text.
+
+const SPEECH_COLUMNS: Record<keyof SpeechSettings, string> = {
+  role: 'role',
+  speakerGuestId: 'speaker_guest_id',
+  tone: 'tone',
+  length: 'length',
+  cringe: 'cringe',
+  mention: 'mention',
+};
+
+export const DEFAULT_SPEECH: SpeechSettings = {
+  role: 'colleague', speakerGuestId: null, tone: 'warm', length: 'short', cringe: 2, mention: '',
+};
+
+function toSpeech(row: Row): Speech {
+  const body = (row.body as string | null) ?? null;
+  return {
+    id: Number(row.id),
+    position: Number(row.position),
+    role: row.role as SpeechRole,
+    speakerGuestId: row.speaker_guest_id == null ? null : Number(row.speaker_guest_id),
+    tone: row.tone as SpeechTone,
+    length: row.length as SpeechLength,
+    cringe: Number(row.cringe),
+    mention: row.mention as string,
+    body,
+    writtenAt: (row.written_at as string | null) ?? null,
+    outOfDate: body !== null && Number(row.written_version) < Number(row.settings_version),
+  };
+}
+
+function oneOf<T extends string>(field: string, value: unknown, allowed: readonly T[]): void {
+  if (!allowed.includes(value as T)) {
+    throw new ValidationError(`${field} must be one of ${allowed.join(', ')} (got ${JSON.stringify(value)})`);
+  }
+}
+
+function validateSpeechPatch(db: DatabaseSync, patch: Partial<SpeechSettings>): [keyof SpeechSettings, unknown][] {
+  const entries = Object.entries(patch ?? {}).filter(([, v]) => v !== undefined) as [keyof SpeechSettings, unknown][];
+  for (const [key, value] of entries) {
+    if (!(key in SPEECH_COLUMNS)) throw new ValidationError(`unknown speech field "${key}"`);
+    if (key === 'role') oneOf('role', value, SPEECH_ROLES);
+    if (key === 'tone') oneOf('tone', value, SPEECH_TONES);
+    if (key === 'length') oneOf('length', value, SPEECH_LENGTHS);
+    if (key === 'cringe' && !(Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 5)) {
+      throw new ValidationError(`cringe must be a whole number from 1 to 5 (got ${JSON.stringify(value)})`);
+    }
+    if (key === 'mention' && typeof value !== 'string') throw new ValidationError('mention must be text');
+    if (key === 'speakerGuestId' && value !== null) {
+      if (!Number.isInteger(value)) throw new ValidationError('speakerGuestId must be a guest id or null');
+      assertGuestExists(db, value as number);
+    }
+  }
+  return entries;
+}
+
+function getSpeech(db: DatabaseSync, id: number): Speech {
+  const row = db.prepare('SELECT * FROM speeches WHERE id = ?').get(id) as Row | undefined;
+  if (!row) throw new ValidationError(`speech id ${id} does not exist`);
+  return toSpeech(row);
+}
+
+function renumberSpeeches(db: DatabaseSync, ids: number[]): void {
+  const update = db.prepare('UPDATE speeches SET position = ? WHERE id = ?');
+  ids.forEach((id, i) => update.run(i + 1, id));
+}
+
+function speechIds(db: DatabaseSync): number[] {
+  return (db.prepare('SELECT id FROM speeches ORDER BY position, id').all() as Row[]).map((r) => Number(r.id));
+}
+
+export function getSpeeches(db: DatabaseSync): SpeechPlan {
+  const { enabled } = db.prepare('SELECT enabled FROM speech_settings WHERE id = 1').get() as { enabled: number };
+  const rows = db.prepare('SELECT * FROM speeches ORDER BY position, id').all() as Row[];
+  return { enabled: Boolean(enabled), speeches: rows.map(toSpeech) };
+}
+
+export function setSpeechesEnabled(db: DatabaseSync, enabled: boolean): SpeechPlan {
+  if (typeof enabled !== 'boolean') throw new ValidationError('enabled must be true or false');
+  db.prepare('UPDATE speech_settings SET enabled = ? WHERE id = 1').run(Number(enabled));
+  return getSpeeches(db);
+}
+
+/** Adds a speech at the end of the running order. Missing settings get the defaults. */
+export function addSpeech(db: DatabaseSync, input: Partial<SpeechSettings> = {}): Speech {
+  return transaction(db, () => {
+    validateSpeechPatch(db, input);
+    const s = { ...DEFAULT_SPEECH, ...Object.fromEntries(Object.entries(input ?? {}).filter(([, v]) => v !== undefined)) };
+    const { n } = db.prepare('SELECT COUNT(*) AS n FROM speeches').get() as { n: number };
+    const result = db.prepare(`INSERT INTO speeches (position, role, speaker_guest_id, tone, length, cringe, mention)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`).run(n + 1, s.role, s.speakerGuestId, s.tone, s.length, s.cringe, s.mention);
+    return getSpeech(db, Number(result.lastInsertRowid));
+  });
+}
+
+export function updateSpeech(db: DatabaseSync, id: number, patch: Partial<SpeechSettings>): Speech {
+  return transaction(db, () => {
+    getSpeech(db, id);
+    const entries = validateSpeechPatch(db, patch);
+    if (entries.length > 0) {
+      const sets = entries.map(([key]) => `${SPEECH_COLUMNS[key]} = ?`).join(', ');
+      db.prepare(`UPDATE speeches SET ${sets}, settings_version = settings_version + 1 WHERE id = ?`)
+        .run(...entries.map(([, v]) => v as string | number | null), id);
+    }
+    return getSpeech(db, id);
+  });
+}
+
+export function removeSpeech(db: DatabaseSync, id: number): void {
+  transaction(db, () => {
+    getSpeech(db, id);
+    db.prepare('DELETE FROM speeches WHERE id = ?').run(id);
+    renumberSpeeches(db, speechIds(db));
+  });
+}
+
+/** Sets the running order. `ids` must contain every speech exactly once. */
+export function reorderSpeeches(db: DatabaseSync, ids: number[]): SpeechPlan {
+  return transaction(db, () => {
+    const current = speechIds(db);
+    if (!Array.isArray(ids)) throw new ValidationError('ids must be a list of speech ids');
+    const given = ids.map(Number);
+    const same = given.length === current.length && new Set(given).size === given.length
+      && given.every((id) => current.includes(id));
+    if (!same) throw new ValidationError(`ids must list every speech exactly once: ${current.join(', ') || 'none'}`);
+    renumberSpeeches(db, given);
+    return getSpeeches(db);
+  });
+}
+
+export function setSpeechText(db: DatabaseSync, id: number, body: string): Speech {
+  return transaction(db, () => {
+    if (!getSpeeches(db).enabled) throw new ValidationError('speeches are switched off');
+    getSpeech(db, id);
+    if (typeof body !== 'string' || body.trim() === '') throw new ValidationError('body must not be empty');
+    db.prepare(`UPDATE speeches SET body = ?, written_at = ?, written_version = settings_version WHERE id = ?`)
+      .run(body, new Date().toISOString(), id);
+    return getSpeech(db, id);
+  });
+}
+
+/** Attending guests with public fields only. This is a privacy boundary for the speech writer, not a planning rule. */
+export function listPublicGuests(db: DatabaseSync): PublicGuest[] {
+  return listGuests(db).filter((g) => g.rsvpStatus === 'attending').map((g) => ({
+    id: g.id, firstName: g.firstName, lastName: g.lastName, jobTitle: g.jobTitle,
+    department: g.department, isBoss: g.isBoss, partnerId: g.partnerId,
+  }));
+}
+
 // --- whole plan ------------------------------------------------------------
 
-/** Clears everything the planner generates; keeps the event settings and guests. */
+/** Clears everything the planner generates; keeps the event settings, guests and speech setup. */
 export function clearPlan(db: DatabaseSync): void {
   transaction(db, () => {
     db.exec(`DELETE FROM seat_assignments; UPDATE seating SET seat_count = 0;
-      DELETE FROM menu_items; DELETE FROM playlist_tracks; DELETE FROM invitation;`);
+      DELETE FROM menu_items; DELETE FROM playlist_tracks; DELETE FROM invitation;
+      UPDATE speeches SET body = NULL, written_at = NULL, written_version = NULL;`);
   });
 }

@@ -159,4 +159,18 @@ export function registerTools(server: McpServer, db: DatabaseSync): void {
     description: 'Replace the invitation. The body is shown as-is and copied into an email by the organiser.',
     inputSchema: { subject: z.string().min(1), body: z.string().min(1) },
   }, (inv) => respond(() => repo.setInvitation(db, inv)));
+
+  // --- speeches ---
+  server.registerTool('get_speeches', {
+    description: 'Get the speech setup chosen by the organiser: whether speeches are switched on, and each speech in running order with its settings (role, optional speaker guest id, tone, length, cringe level 1-5, things to mention) and its current text, if written.',
+  }, () => respond(() => repo.getSpeeches(db)));
+
+  server.registerTool('list_public_guests', {
+    description: 'List the attending guests with public details only: id, name, job title, department, whether they are the boss, and partner id.',
+  }, () => respond(() => repo.listPublicGuests(db)));
+
+  server.registerTool('set_speech_text', {
+    description: 'Write or replace the text of one speech. The body is plain text and is shown as-is to the organiser.',
+    inputSchema: { id, body: z.string().min(1) },
+  }, ({ id, body }) => respond(() => repo.setSpeechText(db, id, body)));
 }

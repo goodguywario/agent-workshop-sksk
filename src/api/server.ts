@@ -19,6 +19,12 @@ const routes: Record<string, Handler> = {
   'GET /api/menu': (db) => repo.getMenu(db),
   'GET /api/playlist': (db) => repo.getPlaylist(db),
   'GET /api/invitation': (db) => repo.getInvitation(db),
+  'GET /api/speeches': (db) => repo.getSpeeches(db),
+  'PUT /api/speeches/settings': (db, _p, body) => repo.setSpeechesEnabled(db, body?.enabled),
+  'PUT /api/speeches/order': (db, _p, body) => repo.reorderSpeeches(db, body?.ids),
+  'POST /api/speeches': (db, _p, body) => repo.addSpeech(db, body ?? {}),
+  'PUT /api/speeches/:id': (db, { id }, body) => repo.updateSpeech(db, id, body ?? {}),
+  'DELETE /api/speeches/:id': (db, { id }) => repo.removeSpeech(db, id),
 };
 
 async function readBody(req: IncomingMessage): Promise<unknown> {
@@ -38,7 +44,7 @@ function send(res: ServerResponse, status: number, body?: unknown): void {
 export function createApi(db: DatabaseSync): Server {
   return createServer(async (req, res) => {
     const path = new URL(req.url ?? '/', 'http://localhost').pathname;
-    const idMatch = path.match(/^(\/api\/guests)\/(\d+)$/);
+    const idMatch = path.match(/^(\/api\/[a-z]+)\/(\d+)$/);
     const key = `${req.method} ${idMatch ? `${idMatch[1]}/:id` : path}`;
     const handler = routes[key];
     if (!handler) return send(res, 404, { error: `no route ${req.method} ${path}` });

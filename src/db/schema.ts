@@ -63,8 +63,42 @@ CREATE TABLE IF NOT EXISTS invitation (
   subject TEXT NOT NULL,
   body TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS speech_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  enabled INTEGER NOT NULL DEFAULT 0
+);
+INSERT OR IGNORE INTO speech_settings (id) VALUES (1);
+
+CREATE TABLE IF NOT EXISTS speeches (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  position INTEGER NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('toastmaster','boss','hr','host','colleague')),
+  speaker_guest_id INTEGER REFERENCES guests(id) ON DELETE SET NULL,
+  tone TEXT NOT NULL CHECK (tone IN ('warm','formal','playful','heartfelt')),
+  length TEXT NOT NULL CHECK (length IN ('short','medium','long')),
+  cringe INTEGER NOT NULL CHECK (cringe BETWEEN 1 AND 5),
+  mention TEXT NOT NULL DEFAULT '',
+  body TEXT,
+  written_at TEXT,
+  -- Bumped on every settings change; copied to written_version when text is written.
+  settings_version INTEGER NOT NULL DEFAULT 1,
+  written_version INTEGER
+);
 `;
 
 export function applySchema(db: DatabaseSync): void {
   db.exec(DDL);
+  upgradeSpeeches(db);
+}
+
+/** Databases created by an early build of the speeches table track staleness with a timestamp; move them to versions. */
+function upgradeSpeeches(db: DatabaseSync): void {
+  const columns = (db.prepare('PRAGMA table_info(speeches)').all() as { name: string }[]).map((c) => c.name);
+  if (!columns.includes('settings_version')) {
+    db.exec(`ALTER TABLE speeches ADD COLUMN settings_version INTEGER NOT NULL DEFAULT 1;
+      ALTER TABLE speeches ADD COLUMN written_version INTEGER;
+      UPDATE speeches SET written_version = 1 WHERE body IS NOT NULL;`);
+  }
+  if (columns.includes('settings_updated_at')) db.exec('ALTER TABLE speeches DROP COLUMN settings_updated_at');
 }

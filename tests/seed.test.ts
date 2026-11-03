@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { ensureDb, openDb } from '../src/db/connection.ts';
-import { clearPlan, getEvent, getGuest, getPlaylist, listGuests, setPlaylist, updateGuest } from '../src/db/repo.ts';
+import { clearPlan, getEvent, getGuest, getPlaylist, getSpeeches, listGuests, setPlaylist, updateGuest } from '../src/db/repo.ts';
 import { seed } from '../src/db/seed.ts';
 import type { Guest } from '../src/db/types.ts';
 import { tempDbPath } from './helpers.ts';
@@ -85,6 +85,18 @@ describe('seed', () => {
     const other = guests.find((g) => g !== asker && asker.notes.includes(fullName(g)))!;
     expect(other.rsvpStatus).toBe('attending');
   });
+});
+
+test('seed has speeches switched off with a toastmaster and the boss', () => {
+  const db = openDb(tempDbPath());
+  seed(db);
+  seed(db);
+  const { enabled, speeches } = getSpeeches(db);
+  expect(enabled).toBe(false);
+  expect(speeches.map((s) => s.role)).toEqual(['toastmaster', 'boss']);
+  expect(speeches.map((s) => s.position)).toEqual([1, 2]);
+  const boss = listGuests(db).find((g) => g.isBoss)!;
+  expect(speeches[1].speakerGuestId).toBe(boss.id);
 });
 
 test('ensureDb seeds an empty database once', () => {

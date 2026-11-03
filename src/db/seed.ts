@@ -1,5 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
-import { addGuest, clearPlan, updateEvent, updateGuest } from './repo.ts';
+import { addGuest, addSpeech, clearPlan, setSpeechesEnabled, updateEvent, updateGuest } from './repo.ts';
 import type { GuestInput, PartyEvent } from './types.ts';
 
 // The workshop's seed data: one event and its guest list.
@@ -72,4 +72,10 @@ export function seed(db: DatabaseSync): void {
   for (const g of SEED_GUESTS) {
     if (g.partner) updateGuest(db, ids.get(`${g.firstName} ${g.lastName}`)!, { partnerId: ids.get(g.partner)! });
   }
+
+  // Speeches start switched off, with two examples so the feature is quick to try.
+  db.exec("DELETE FROM speeches; DELETE FROM sqlite_sequence WHERE name = 'speeches';");
+  setSpeechesEnabled(db, false);
+  addSpeech(db, { role: 'toastmaster', tone: 'playful', length: 'short', cringe: 4 });
+  addSpeech(db, { role: 'boss', speakerGuestId: ids.get('Margaret Holloway')!, tone: 'formal', length: 'medium', cringe: 1 });
 }

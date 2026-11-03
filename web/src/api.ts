@@ -1,5 +1,5 @@
 import type {
-  Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Track,
+  Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Speech, SpeechPlan, SpeechSettings, Track,
 } from '../../src/db/types.ts';
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -25,6 +25,14 @@ export const api = {
   getMenu: () => request<MenuItem[]>('GET', '/menu'),
   getPlaylist: () => request<Track[]>('GET', '/playlist'),
   getInvitation: () => request<Invitation | null>('GET', '/invitation'),
+  getSpeeches: () => request<SpeechPlan>('GET', '/speeches'),
+  setSpeechesEnabled: (enabled: boolean) => request<SpeechPlan>('PUT', '/speeches/settings', { enabled }),
+  addSpeech: (input: Partial<SpeechSettings> = {}) => request<Speech>('POST', '/speeches', input),
+  updateSpeech: (id: number, patch: Partial<SpeechSettings>) => request<Speech>('PUT', `/speeches/${id}`, patch),
+  removeSpeech: (id: number) => request<void>('DELETE', `/speeches/${id}`),
+  reorderSpeeches: (ids: number[]) => request<SpeechPlan>('PUT', '/speeches/order', { ids }),
 };
 
-export type { Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Track };
+export type {
+  Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Speech, SpeechPlan, SpeechSettings, Track,
+};

@@ -8,7 +8,7 @@ import { Menu } from './views/Menu.tsx';
 import { Playlist } from './views/Playlist.tsx';
 import { Seating } from './views/Seating.tsx';
 import { Settings } from './views/Settings.tsx';
-import { SpeechesPrototype } from './views/SpeechesPrototype.tsx'; // PROTOTYPE
+import { Speeches } from './views/Speeches.tsx';
 
 type ViewId = 'settings' | 'guests' | 'invitation' | 'seating' | 'menu' | 'playlist' | 'speeches';
 
@@ -19,7 +19,7 @@ const VIEWS: { id: ViewId; label: string; render: () => ReactNode }[] = [
   { id: 'seating', label: 'Seating', render: () => <Seating /> },
   { id: 'menu', label: 'Menu', render: () => <Menu /> },
   { id: 'playlist', label: 'Playlist', render: () => <Playlist /> },
-  { id: 'speeches', label: 'Speeches (prototype)', render: () => <SpeechesPrototype /> }, // PROTOTYPE
+  { id: 'speeches', label: 'Speeches', render: () => <Speeches /> },
 ];
 
 function currentView(): ViewId {
@@ -29,14 +29,18 @@ function currentView(): ViewId {
 
 /** Which planner outputs exist, so the nav can show progress while the planner runs. */
 async function fetchProgress(): Promise<Partial<Record<ViewId, boolean>>> {
-  const [invitation, seating, menu, playlist] = await Promise.all([
-    api.getInvitation(), api.getSeating(), api.getMenu(), api.getPlaylist(),
+  const [invitation, seating, menu, playlist, speeches] = await Promise.all([
+    api.getInvitation(), api.getSeating(), api.getMenu(), api.getPlaylist(), api.getSpeeches(),
   ]);
   return {
     invitation: invitation !== null,
     seating: seating.seatCount > 0,
     menu: menu.length > 0,
     playlist: playlist.length > 0,
+    // No dot while speeches are switched off: there is nothing to plan.
+    speeches: speeches.enabled
+      ? speeches.speeches.length > 0 && speeches.speeches.every((s) => s.body !== null && !s.outOfDate)
+      : undefined,
   };
 }
 

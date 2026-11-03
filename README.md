@@ -2,7 +2,7 @@
 
 A small app for planning a company Christmas party, built so you can practise writing **agents** and **skills**.
 
-A `party-planner` agent in [opencode](https://opencode.ai) delegates to four sub-agents:
+A `party-planner` agent in [opencode](https://opencode.ai) delegates to five sub-agents:
 
 | Sub-agent | Plans |
 |---|---|
@@ -10,6 +10,7 @@ A `party-planner` agent in [opencode](https://opencode.ai) delegates to four sub
 | seating planner | the seating plan |
 | catering agent | the menu |
 | playlist composer | the playlist |
+| speech writer | the speeches, one per speaker, only when speeches are switched on in the web app |
 
 The sub-agents read and write the party through an MCP server. A web app shows the result live while they work.
 
@@ -88,7 +89,7 @@ The commands run on opencode's default `build` agent. The party-planning agents 
 
 ```
 .opencode/
-  agents/        party-planner (primary) and its four sub-agents   ← you edit these
+  agents/        party-planner (primary) and its five sub-agents   ← you edit these
   skills/        house rules the agents load on demand              ← and these
   commands/      /plan-party
 opencode.json    registers the party MCP server and model providers
@@ -119,6 +120,9 @@ The agents never touch the database or the files directly. They call tools on th
 | Menu | `get_menu`, `set_menu` |
 | Playlist | `get_playlist`, `set_playlist` |
 | Invitation | `get_invitation`, `set_invitation` |
+| Speeches | `get_speeches`, `list_public_guests`, `set_speech_text` |
+
+The speech settings (who speaks, tone, length, cringe level, things to mention) are chosen by the organiser on the **Speeches** page; agents can read them but not change them. `list_public_guests` returns only attending guests and only their public details, so the speech writer can't leak notes, allergies or diets.
 
 Inside opencode, the tools are prefixed with the server name, e.g. `party_set_seating_plan`.
 
@@ -135,7 +139,7 @@ Knowing better is the agents' job, and that's what you're here to teach them.
 | Command | What it does |
 |---|---|
 | `npm run dev` | Starts the API and the web app |
-| `npm run plan:reset` | Clears the generated plan (seating, menu, playlist, invitation). Keeps settings and guests, including your edits. |
+| `npm run plan:reset` | Clears the generated plan (seating, menu, playlist, invitation, speech texts). Keeps settings, guests and the speech setup, including your edits. |
 | `npm run db:reset` | Resets everything to the original seed data |
 | `npm test` | Runs the test suite |
 

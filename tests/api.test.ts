@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'node:net';
-import { afterAll, beforeAll, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { createApi } from '../src/api/server.ts';
 import { ensureDb } from '../src/db/connection.ts';
 import { tempDbPath } from './helpers.ts';
@@ -52,4 +52,50 @@ test('PUT /api/event updates settings', async () => {
 test('GET /api/invitation returns null when unset; unknown route is 404', async () => {
   expect(await (await fetch(`${base}/api/invitation`)).json()).toBeNull();
   expect((await fetch(`${base}/api/nope`)).status).toBe(404);
+});
+
+describe('speeches', () => {
+  const plan = async () => (await fetch(`${base}/api/speeches`)).json();
+
+  test('GET /api/speeches returns the seeded setup, switched off', async () => {
+    const res = await plan();
+    expect(res.enabled).toBe(false);
+    expect(res.speeches.map((s: { role: string }) => s.role)).toEqual(['toastmaster', 'boss']);
+  });
+
+  test('PUT /api/speeches/settings switches speeches on', async () => {
+    const res = await fetch(`${base}/api/speeches/settings`, json('PUT', { enabled: true }));
+    expect(res.status).toBe(200);
+    expect((await plan()).enabled).toBe(true);
+    expect((await fetch(`${base}/api/speeches/settings`, json('PUT', { enabled: 'yes' }))).status).toBe(400);
+  });
+
+  test('POST, PUT, reorder and DELETE a speech', async () => {
+    const created = await fetch(`${base}/api/speeches`, json('POST', {}));
+    expect(created.status).toBe(201);
+    const speech = await created.json();
+    expect(speech).toMatchObject({ role: 'colleague', tone: 'warm', length: 'short', cringe: 2 });
+
+    const updated = await fetch(`${base}/api/speeches/${speech.id}`, json('PUT', { tone: 'formal', mention: 'Thanks!' }));
+    expect(await updated.json()).toMatchObject({ tone: 'formal', mention: 'Thanks!' });
+
+    const ids: number[] = (await plan()).speeches.map((s: { id: number }) => s.id);
+    const reversed = [...ids].reverse();
+    const reordered = await (await fetch(`${base}/api/speeches/order`, json('PUT', { ids: reversed }))).json();
+    expect(reordered.speeches.map((s: { id: number }) => s.id)).toEqual(reversed);
+    expect((await fetch(`${base}/api/speeches/order`, json('PUT', { ids: ids.slice(1) }))).status).toBe(400);
+
+    expect((await fetch(`${base}/api/speeches/${speech.id}`, { method: 'DELETE' })).status).toBe(204);
+    expect((await plan()).speeches).toHaveLength(ids.length - 1);
+  });
+
+  test('bad speech values return 400 with a message', async () => {
+    const id = (await plan()).speeches[0].id;
+    for (const body of [{ cringe: 7 }, { tone: 'angry' }]) {
+      const res = await fetch(`${base}/api/speeches/${id}`, json('PUT', body));
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/cringe|tone/);
+    }
+    expect((await fetch(`${base}/api/speeches/999`, json('PUT', { cringe: 3 }))).status).toBe(400);
+  });
 });
