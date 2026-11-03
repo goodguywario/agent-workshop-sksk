@@ -3,7 +3,10 @@ description: Plans the menu (starters, mains, desserts, drinks) for the party. U
 mode: subagent
 permission:
   "*": deny
-  skill: allow
+  skill:
+    "*": deny
+    allergies: allow
+    christmas-traditions: allow
   party_get_event: allow
   party_list_guests: allow
   party_get_menu: allow

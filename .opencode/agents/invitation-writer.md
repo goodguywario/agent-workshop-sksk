@@ -3,7 +3,10 @@ description: Writes the plain-text email invitation for the party. Use for anyth
 mode: subagent
 permission:
   "*": deny
-  skill: allow
+  skill:
+    "*": deny
+    email-invitation-style: allow
+    allergies: allow
   party_get_event: allow
   party_list_guests: allow
   party_get_invitation: allow

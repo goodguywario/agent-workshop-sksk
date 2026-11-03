@@ -65,6 +65,8 @@ web/             the web app
 
 Every agent can see each skill's `description`. The full skill body is loaded only when an agent decides to use it, so write descriptions that make the agent reach for the skill at the right moment.
 
+Each agent may only load the skills listed under `skill:` in its `permission` block. **When you create a new skill, also allow it in every agent that should use it**, or that agent won't see it at all.
+
 ## How state reaches the agents
 
 The agents never touch the database or the files directly. They call tools on the `party` MCP server (`src/mcp/tools.ts`):
