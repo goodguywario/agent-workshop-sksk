@@ -8,8 +8,9 @@ import { Menu } from './views/Menu.tsx';
 import { Playlist } from './views/Playlist.tsx';
 import { Seating } from './views/Seating.tsx';
 import { Settings } from './views/Settings.tsx';
+import { SpeechesPrototype } from './views/SpeechesPrototype.tsx'; // PROTOTYPE
 
-type ViewId = 'settings' | 'guests' | 'invitation' | 'seating' | 'menu' | 'playlist';
+type ViewId = 'settings' | 'guests' | 'invitation' | 'seating' | 'menu' | 'playlist' | 'speeches';
 
 const VIEWS: { id: ViewId; label: string; render: () => ReactNode }[] = [
   { id: 'settings', label: 'Event settings', render: () => <Settings /> },
@@ -18,6 +19,7 @@ const VIEWS: { id: ViewId; label: string; render: () => ReactNode }[] = [
   { id: 'seating', label: 'Seating', render: () => <Seating /> },
   { id: 'menu', label: 'Menu', render: () => <Menu /> },
   { id: 'playlist', label: 'Playlist', render: () => <Playlist /> },
+  { id: 'speeches', label: 'Speeches (prototype)', render: () => <SpeechesPrototype /> }, // PROTOTYPE
 ];
 
 function currentView(): ViewId {
