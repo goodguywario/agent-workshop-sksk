@@ -49,6 +49,11 @@ export function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  // On narrow screens the nav scrolls sideways; keep the current view's tab visible.
+  useEffect(() => {
+    document.querySelector('.sidebar [aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [view]);
+
   return (
     <div className="shell">
       <aside className="sidebar">
