@@ -19,6 +19,7 @@ const routes: Record<string, Handler> = {
   'GET /api/menu': (db) => repo.getMenu(db),
   'GET /api/playlist': (db) => repo.getPlaylist(db),
   'GET /api/invitation': (db) => repo.getInvitation(db),
+  'DELETE /api/plan': (db) => repo.clearPlan(db),
 };
 
 async function readBody(req: IncomingMessage): Promise<unknown> {

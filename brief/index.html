@@ -548,19 +548,22 @@
 
     <!-- 6: how the app is built -->
     <section>
-      <h2>How the app is built</h2>
-      <svg class="diagram" viewBox="0 0 1200 480" role="img" aria-label="The frontend talks to the database through a JSON API. The MCP server gives the agents read and write tools on the same database. The opencode harness runs the agents, and the agents load skills.">
+      <h2>Christmas Party Planner: How the app is built</h2>
+      <svg class="diagram" viewBox="0 0 1200 520" role="img" aria-label="The user interacts with the frontend and gives the opencode harness /commands. The frontend talks to the database through a JSON API. The MCP server gives the agents read and write tools on the same database. The opencode harness runs the agents, and the agents load skills.">
         <defs><marker id="head-arch" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#84d6b2"/></marker></defs>
+        <g class="node you"><rect x="10" y="6" width="220" height="72" rx="14"/><text class="title" x="30" y="51">User</text></g>
+        <g class="fragment" data-fragment-index="1"><path class="arrow" style="marker-end:url(#head-arch)" d="M120,80 L120,106"/><text class="arrow-label" x="134" y="99">interacts</text></g>
         <g class="fragment" data-fragment-index="1"><g class="node"><rect x="10" y="110" width="220" height="210" rx="14"/><text class="title" x="30" y="150">Frontend</text><text class="name" x="30" y="178">web/src/views/</text><text class="sub" x="30" y="210">the planning tool:</text><text class="sub" x="30" y="233">settings, guests,</text><text class="sub" x="30" y="256">invitation, seating,</text><text class="sub" x="30" y="279">menu, playlist</text></g></g>
         <g class="fragment" data-fragment-index="2"><path class="arrow" style="marker-start:url(#head-arch);marker-end:url(#head-arch)" d="M234,215 L316,215"/><text class="arrow-label" x="275" y="203" text-anchor="middle">JSON API</text><g class="node"><rect x="320" y="110" width="220" height="210" rx="14"/><text class="title" x="340" y="150">Database</text><text class="name" x="340" y="178">data/party.db</text><text class="sub" x="340" y="210">seeded event</text><text class="sub" x="340" y="233">and guest list,</text><text class="sub" x="340" y="256">plus the plan</text></g></g>
         <g class="fragment" data-fragment-index="3"><path class="arrow" style="marker-start:url(#head-arch);marker-end:url(#head-arch)" d="M544,215 L626,215"/><text class="arrow-label" x="585" y="203" text-anchor="middle">read/write</text><g class="node"><rect x="630" y="110" width="230" height="210" rx="14"/><text class="title" x="650" y="150">MCP server</text><text class="name" x="650" y="178">src/mcp/</text><text class="sub" x="650" y="210">get_… and set_…</text><text class="sub" x="650" y="233">tools: the agents’ only</text><text class="sub" x="650" y="256">way to the data</text></g></g>
         <g class="fragment" data-fragment-index="4"><path class="arrow" style="marker-start:url(#head-arch);marker-end:url(#head-arch)" d="M864,235 L926,235"/><text class="arrow-label" x="888" y="223" text-anchor="middle">tools</text><g class="node"><rect x="930" y="160" width="260" height="160" rx="14"/><text class="title" x="950" y="200">Agents</text><text class="name" x="950" y="228">.opencode/agents/</text><text class="sub" x="950" y="260">party-planner</text><text class="sub" x="950" y="283">+ 4 sub-agents</text></g></g>
-        <g class="fragment" data-fragment-index="5"><path class="arrow dashed" style="marker-end:url(#head-arch)" d="M1060,322 L1060,356"/><text class="arrow-label" x="1072" y="344">loads</text><g class="node"><rect x="930" y="360" width="260" height="110" rx="14"/><text class="title" x="950" y="400">Skills</text><text class="name" x="950" y="428">.opencode/skills/</text><text class="sub" x="950" y="460">the house rules</text></g></g>
+        <g class="fragment" data-fragment-index="5"><path class="arrow dashed" style="marker-end:url(#head-arch)" d="M1060,322 L1060,356"/><text class="arrow-label" x="1072" y="344">loads</text><g class="node"><rect x="930" y="360" width="260" height="110" rx="14"/><text class="title" x="950" y="400">Skills</text><text class="name" x="950" y="428">.opencode/skills/</text><text class="sub" x="950" y="460">"the house rules"</text></g></g>
+        <g class="fragment" data-fragment-index="6"><path class="arrow" style="marker-end:url(#head-arch)" d="M232,42 L926,42"/><text class="arrow-label" x="580" y="30" text-anchor="middle">/commands</text></g>
         <g class="fragment" data-fragment-index="6"><path class="arrow" style="marker-end:url(#head-arch)" d="M1060,122 L1060,156"/><text class="arrow-label" x="1072" y="140">runs</text><g class="node"><rect x="930" y="6" width="260" height="114" rx="14"/><text class="title" x="950" y="46">Harness</text><text class="name" x="950" y="74">opencode</text><text class="sub" x="950" y="106">set up in opencode.json</text></g></g>
         <g class="fragment" data-fragment-index="7"><rect class="edit-zone" x="920" y="152" width="278" height="326" rx="20"/><text class="arrow-label app" x="900" y="430" text-anchor="end" style="font-size:22px">you edit these</text></g>
       </svg>
       <p class="arch-foot fragment rise" data-fragment-index="7"><code>npm run dev</code> starts the frontend and its API. opencode starts the MCP server for the agents.</p>
-      <aside class="notes">Left to right: the web app users see, the SQLite database with the seeded event and guests (and the plan once it's made), and the MCP server, the only way the agents can touch the data. On the right: opencode runs the agents, and the agents load skills. Everything except agents and skills is the developers' work. Agents and skills are plain-language files, and that's where you come in today.</aside>
+      <aside class="notes">Top left: the user, who interacts with the frontend and drives opencode with /commands like /plan-party. Left to right: the web app users see, the SQLite database with the seeded event and guests (and the plan once it's made), and the MCP server, the only way the agents can touch the data. On the right: opencode runs the agents, and the agents load skills. Everything except agents and skills is the developers' work. Agents and skills are plain-language files, and that's where you come in today.</aside>
     </section>
 
     <!-- 7: getting the project -->
@@ -685,6 +688,14 @@ code agent-workshop-sksk</code></pre>
         <div class="card fragment rise">
           <h3>Last year's suggestion box</h3>
           <p class="small muted">Collect what guests wished for last year, and use it in this year's plan.</p>
+        </div>
+        <div class="card fragment rise">
+          <h3>Island seating</h3>
+          <p class="small muted">Island tables with any number of seats. Drag tables and chairs around the room, and pick the head table.</p>
+        </div>
+        <div class="card fragment rise">
+          <h3>Plan only what you want</h3>
+          <p class="small muted">The party planner routes the work, so you can re-plan just the seating or the menu and keep the rest. A run button in each view, plus a checklist for planning several at once.</p>
         </div>
       </div>
       <p class="fragment rise" style="margin-top: 44px">Start with <code>/plan-feature</code> and develop your idea in your own words.</p>

@@ -53,3 +53,12 @@ test('GET /api/invitation returns null when unset; unknown route is 404', async 
   expect(await (await fetch(`${base}/api/invitation`)).json()).toBeNull();
   expect((await fetch(`${base}/api/nope`)).status).toBe(404);
 });
+
+test('DELETE /api/plan clears the plan and keeps guests', async () => {
+  const guestsBefore = (await (await fetch(`${base}/api/guests`)).json()).length;
+  const res = await fetch(`${base}/api/plan`, { method: 'DELETE' });
+  expect(res.status).toBe(204);
+  expect(await (await fetch(`${base}/api/invitation`)).json()).toBeNull();
+  expect((await (await fetch(`${base}/api/seating`)).json()).seatCount).toBe(0);
+  expect((await (await fetch(`${base}/api/guests`)).json()).length).toBe(guestsBefore);
+});
