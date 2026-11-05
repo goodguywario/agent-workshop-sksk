@@ -123,6 +123,7 @@
       place-items: center;
     }
 
+    .reveal .cols.roles { margin: 40px 0 48px !important; }
     .cols.tune { grid-template-columns: 1.15fr .85fr; margin-top: 18px; }
     .reveal .tasks li { margin-bottom: .45em; }
     .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
@@ -354,13 +355,22 @@
 
     <!-- 2 -->
     <section>
-      <h2>You are part of the system</h2>
-      <ul class="bullets">
-        <li class="fragment rise">You will be part of an agentic system: as <strong>users, experts and data owners</strong>.</li>
-        <li class="fragment rise">The distance between product owners, architects and developers is rapidly shrinking.</li>
-        <li class="fragment rise">Your role: <strong>subject matter and domain expert</strong>.</li>
-        <li class="fragment rise">The developer is still important: tools, interfaces and, not least, <strong>security</strong>.</li>
-      </ul>
+      <h2>You are part of the <strong>agentic system</strong></h2>
+      <p class="fragment rise" data-fragment-index="1">You know things developers don't. That gap is where conversations most often break down.</p>
+      <div class="cols equal roles">
+        <div class="card fragment rise" data-fragment-index="2">
+          <h3>You: the domain experts</h3>
+          <p class="small muted">Data and process owners, subject matter experts</p>
+          <p class="small">You shape how the agents behave, in <strong>agent and skill instructions</strong></p>
+        </div>
+        <div class="card fragment rise" data-fragment-index="3">
+          <h3>Developers: the tools</h3>
+          <p class="small muted">Data model, APIs, auth, frontends, MCP servers</p>
+          <p class="small">They build what the agents use, and keep it <strong>secure</strong></p>
+        </div>
+      </div>
+      <p class="callout fragment rise" data-fragment-index="4">Equally important roles. A well-designed agentic system lets each side build what it knows best, together.</p>
+      <aside class="notes">Non-technical people have an equally important role in building agentic systems: as data and process owners, and as subject matter and domain experts. That's knowledge traditional developers don't have, and it's where conversations most often break down. The power of a properly designed agentic system is that the domain experts develop the agents' behaviour directly, through agent and skill instructions, while working with developers who build the tools and interfaces: the data model, APIs, auth, frontends, and protocol-compliant interfaces like MCP servers. The distance between product owners, architects and developers is shrinking fast.</aside>
     </section>
 
     <!-- 3 -->
