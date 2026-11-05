@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "brief/index.html"
+        ],
+        "createdAt": "2026-11-05T19:13:04.143Z",
+        "reason": "Claude: static scan assumes default white background/black text; the deck sets dark --bg #0f1513 with light --text #eef3f0 and no #000/#fff colours exist in the file; rendered screenshots of every edited slide show high-contrast text"
+      }
+    ]
+  }
+}

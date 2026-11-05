@@ -124,6 +124,10 @@
     }
 
     .reveal .cols.roles { margin: 40px 0 48px !important; }
+    .reveal .prompt-label { margin: 22px 0 0 !important; font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); }
+    .reveal pre.prompt { margin: 8px 0 0; font-size: 22px; }
+    .reveal .cols.build { margin-top: 36px !important; }
+    .reveal .cols.prereqs { margin-top: 30px !important; }
     .cols.tune { grid-template-columns: 1.15fr .85fr; margin-top: 18px; }
     .reveal .tasks li { margin-bottom: .45em; }
     .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
@@ -384,6 +388,32 @@
         <li class="fragment rise">Insight into how developers work in a <strong>spec-driven development</strong> pipeline</li>
         <li class="fragment rise">Hands-on experience with <strong>implementing a feature</strong> from a spec</li>
       </ul>
+    </section>
+
+    <!-- 3b: prerequisites -->
+    <section>
+      <h2>What you need</h2>
+      <div class="cols equal prereqs">
+        <div class="card">
+          <h3>Everyone</h3>
+          <ul class="bullets small">
+            <li>A laptop</li>
+            <li><strong>Node.js</strong> v22.13 or newer</li>
+            <li><strong>opencode</strong> v2 or newer, the terminal version</li>
+            <li><strong>VS Code</strong></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>On Windows, also</h3>
+          <ul class="bullets small">
+            <li><strong>WSL</strong> (Windows Subsystem for Linux)</li>
+            <li>Install Node.js and opencode <em>inside</em> WSL, not in Windows</li>
+            <li>The <strong>WSL</strong> extension for VS Code, by Microsoft</li>
+          </ul>
+        </div>
+      </div>
+      <p class="callout" style="margin-top: 44px">Check it in a terminal (a WSL terminal on Windows): <code>node --version</code> and <code>opencode --version</code></p>
+      <aside class="notes">Check with node --version and opencode --version, run in a WSL terminal on Windows. Node must be 22.13 or newer: the app uses Node's built-in SQLite module, and older versions fail with node:sqlite errors. On Windows, the WSL extension lets VS Code open the project folder inside WSL, so its terminals run Linux where Node and opencode are installed.</aside>
     </section>
 
     <!-- 4 -->
@@ -728,7 +758,7 @@ code agent-workshop-sksk</code></pre>
 
     <!-- 9 -->
     <section>
-      <p class="label">Hands-on session 4</p>
+      <p class="label">Handover to a developer</p>
       <h2>Now what? From spec to production</h2>
       <div class="rail">
         <div class="station fragment rise"><h3>Issues</h3><p>The spec is split into issues on a Kanban board and assigned</p></div>
@@ -746,6 +776,34 @@ code agent-workshop-sksk</code></pre>
       </div>
       <p class="callout fragment rise" style="margin-top: 30px">Let's give the spec to the coding agent!</p>
       <aside class="notes">Then hand a spec from session 3 to the coding agent live, and work out the bugs together.</aside>
+    </section>
+
+    <!-- 9b -->
+    <section>
+      <p class="label">Hands-on session 4</p>
+      <h2>Build your feature</h2>
+      <p class="small">Point the coding agent in <code>opencode</code> to the feature folder from your design work, using your own folder name.</p>
+      <p class="prompt-label">Example prompt</p>
+      <pre class="prompt"><code>Implement the feature described in the files in requests/speech-writer</code></pre>
+      <div class="cols equal build">
+        <div class="card fragment rise">
+          <h3>Changed the data model?</h3>
+          <ul class="bullets small">
+            <li>Restart <code>npm run dev</code> before you test the result</li>
+            <li>Errors in the terminal? Copy and paste them into the chat, and let the coding agent deal with them!</li>
+          </ul>
+        </div>
+        <div class="card fragment rise">
+          <h3>New or changed MCP tools?</h3>
+          <p class="small muted">Reconnect opencode to the MCP server:</p>
+          <ol class="steps small">
+            <li>Type <code>/mcps</code></li>
+            <li>Press <code>space</code> to disconnect</li>
+            <li>Select <code>party</code> again to reconnect</li>
+          </ol>
+        </div>
+      </div>
+      <aside class="notes">Use your own feature folder, e.g. requests/last-years-suggestions. The folder holds idea.md, the mockups and spec.md, and the coding agent should read all of it. On restarting: on startup the database creates missing tables and adds missing columns, so a restart picks up most data model changes. It can't migrate renamed, removed or changed columns, or a NOT NULL column without a default; the error then says to give the column a DEFAULT or delete the data folder (which also loses guest edits). Paste such errors into the chat and let the agent fix them. Reconnecting the MCP server is needed because opencode keeps the tool list it got when it connected.</aside>
     </section>
 
     <!-- 10 -->
