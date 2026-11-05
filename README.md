@@ -109,7 +109,7 @@ Each agent may only load the skills listed under `skill:` in its `permission` bl
 
 ## How state reaches the agents
 
-The agents never touch the database or the files directly. They call tools on the `party` MCP server (`src/mcp/tools.ts`):
+The agents never touch the database or the files directly. They call tools on the `party` MCP server (`src/mcp/tools.ts`), and each tool is an HTTP call to the same API the web app uses. **`npm run dev` must be running for the tools to work.**
 
 | Area | Tools |
 |---|---|
@@ -172,5 +172,6 @@ If your opencode version doesn't list them, add an `lmstudio` entry **inside the
 
 - **The web app says it can't reach the API.** `npm run dev` isn't running, or port 3001 or 5173 is taken. Stop the other process, or set `PORT=3002 npm run dev` and update the proxy in `vite.config.ts`.
 - **Agents say they have no `party_*` tools.** Run `opencode mcp list` from the repo folder. The first call in a fresh clone may say "No MCP servers configured", and a new server shows `pending` for a few seconds; run it again and it should say `connected`. If it stays disconnected, run `npx tsx src/mcp/server.ts` to see the error.
+- **Tools answer "Can't reach the party API".** Start `npm run dev`. The MCP server looks for the API on port 3001; if you moved it, set `PARTY_API_URL` (for example `PARTY_API_URL=http://localhost:3002`) before starting opencode.
 - **`node:sqlite` errors.** Your Node.js is older than 22.13. Upgrade it.
 - **The plan looks stale.** The web app polls every 2 seconds. If a run was interrupted, click **Clear plan** in the sidebar and run again.

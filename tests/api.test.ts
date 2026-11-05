@@ -62,3 +62,12 @@ test('DELETE /api/plan clears the plan and keeps guests', async () => {
   expect((await (await fetch(`${base}/api/seating`)).json()).seatCount).toBe(0);
   expect((await (await fetch(`${base}/api/guests`)).json()).length).toBe(guestsBefore);
 });
+
+test('write routes validate the body shape', async () => {
+  const bad = await fetch(`${base}/api/menu`, json('PUT', { items: [{ course: 'soup', name: 'X' }] }));
+  expect(bad.status).toBe(400);
+  expect((await bad.json()).error).toMatch(/starter|main|dessert|drinks/);
+  const ok = await fetch(`${base}/api/playlist`, json('PUT', { tracks: [{ title: 'Jingle', artist: 'Bells' }] }));
+  expect(await ok.json()).toEqual([{ position: 1, title: 'Jingle', artist: 'Bells', note: '' }]);
+  expect((await fetch(`${base}/api/seating`, json('PUT', { guestIds: 'nope' }))).status).toBe(400);
+});
