@@ -25,6 +25,7 @@ export const api = {
   getMenu: () => request<MenuItem[]>('GET', '/menu'),
   getPlaylist: () => request<Track[]>('GET', '/playlist'),
   getInvitation: () => request<Invitation | null>('GET', '/invitation'),
+  clearPlan: () => request<void>('DELETE', '/plan'),
 };
 
 export type { Guest, GuestInput, Invitation, MenuItem, PartyEvent, SeatingPlan, Track };

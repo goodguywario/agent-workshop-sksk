@@ -1,15 +1,30 @@
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { describe, expect, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
+import { createApi } from '../src/api/server.ts';
 import { ensureDb } from '../src/db/connection.ts';
+import { createApiClient } from '../src/mcp/api-client.ts';
 import { registerTools } from '../src/mcp/tools.ts';
 import { tempDbPath } from './helpers.ts';
 
-async function connect(): Promise<Client> {
+const apis: Server[] = [];
+afterAll(() => { apis.forEach((api) => api.close()); });
+
+/** Starts the party API on a fresh database and returns its base URL. */
+async function startApi(): Promise<string> {
+  const api = createApi(ensureDb(tempDbPath()));
+  apis.push(api);
+  await new Promise<void>((resolve) => api.listen(0, resolve));
+  return `http://localhost:${(api.address() as AddressInfo).port}`;
+}
+
+async function connect(baseUrl?: string): Promise<Client> {
   const server = new McpServer({ name: 'party', version: '1.0.0' });
-  registerTools(server, ensureDb(tempDbPath()));
+  registerTools(server, createApiClient(baseUrl ?? await startApi()));
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await server.connect(serverSide);
   const client = new Client({ name: 'test', version: '1.0.0' });
@@ -68,10 +83,17 @@ describe('party MCP tools', () => {
   });
 });
 
-test('server bootstraps a missing database', async () => {
+test('tools explain when the API is not running', async () => {
+  const client = await connect('http://localhost:1');
+  const res = await call(client, 'list_guests');
+  expect(res.isError).toBe(true);
+  expect(res.text).toContain('npm run dev');
+});
+
+test('stdio server reaches the API at PARTY_API_URL', async () => {
   const transport = new StdioClientTransport({
     command: 'npx', args: ['tsx', 'src/mcp/server.ts'],
-    env: { ...process.env, PARTY_DB: tempDbPath() } as Record<string, string>,
+    env: { ...process.env, PARTY_API_URL: await startApi() } as Record<string, string>,
   });
   const client = new Client({ name: 'test', version: '1.0.0' });
   await client.connect(transport);
