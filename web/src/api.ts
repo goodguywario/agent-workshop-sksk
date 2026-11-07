@@ -31,6 +31,7 @@ export const api = {
   updateSpeech: (id: number, patch: Partial<SpeechSettings>) => request<Speech>('PUT', `/speeches/${id}`, patch),
   removeSpeech: (id: number) => request<void>('DELETE', `/speeches/${id}`),
   reorderSpeeches: (ids: number[]) => request<SpeechPlan>('PUT', '/speeches/order', { ids }),
+  clearPlan: () => request<void>('DELETE', '/plan'),
 };
 
 export type {

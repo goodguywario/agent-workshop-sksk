@@ -1,30 +1,44 @@
-// JSON API for the frontend. Same data layer (and same validation) as the MCP server.
+// JSON API: the only way to the data. The frontend and the MCP server (and so the agents) both go through it.
 
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { DatabaseSync } from 'node:sqlite';
 import { pathToFileURL } from 'node:url';
 import { ensureDb } from '../db/connection.ts';
 import * as repo from '../db/repo.ts';
+import {
+  eventFields, guestFields, invitationFields, menuFields, newGuestFields, parse, partial, playlistFields, seatingFields,
+  speechTextFields,
+} from './schemas.ts';
 
 type Handler = (db: DatabaseSync, params: { id: number }, body: any) => unknown;
 
 const routes: Record<string, Handler> = {
   'GET /api/event': (db) => repo.getEvent(db),
-  'PUT /api/event': (db, _p, body) => repo.updateEvent(db, body),
+  'PUT /api/event': (db, _p, body) => repo.updateEvent(db, parse(partial(eventFields), body) as never),
   'GET /api/guests': (db) => repo.listGuests(db),
-  'POST /api/guests': (db, _p, body) => repo.addGuest(db, body),
-  'PUT /api/guests/:id': (db, { id }, body) => repo.updateGuest(db, id, body),
+  'POST /api/guests': (db, _p, body) => repo.addGuest(db, parse(newGuestFields, body) as never),
+  'GET /api/guests/:id': (db, { id }) => repo.getGuest(db, id),
+  'PUT /api/guests/:id': (db, { id }, body) => repo.updateGuest(db, id, parse(partial(guestFields), body) as never),
   'DELETE /api/guests/:id': (db, { id }) => repo.removeGuest(db, id),
   'GET /api/seating': (db) => repo.getSeatingPlan(db),
+  'PUT /api/seating': (db, _p, body) => repo.setSeatingPlan(db, parse(seatingFields, body).guestIds),
+  'DELETE /api/seating': (db) => repo.clearSeatingPlan(db),
   'GET /api/menu': (db) => repo.getMenu(db),
+  'PUT /api/menu': (db, _p, body) => repo.setMenu(db, parse(menuFields, body).items as never),
   'GET /api/playlist': (db) => repo.getPlaylist(db),
+  'PUT /api/playlist': (db, _p, body) => repo.setPlaylist(db, parse(playlistFields, body).tracks),
   'GET /api/invitation': (db) => repo.getInvitation(db),
+  'PUT /api/invitation': (db, _p, body) => repo.setInvitation(db, parse(invitationFields, body)),
+  'DELETE /api/plan': (db) => repo.clearPlan(db),
   'GET /api/speeches': (db) => repo.getSpeeches(db),
   'PUT /api/speeches/settings': (db, _p, body) => repo.setSpeechesEnabled(db, body?.enabled),
   'PUT /api/speeches/order': (db, _p, body) => repo.reorderSpeeches(db, body?.ids),
   'POST /api/speeches': (db, _p, body) => repo.addSpeech(db, body ?? {}),
   'PUT /api/speeches/:id': (db, { id }, body) => repo.updateSpeech(db, id, body ?? {}),
+  'PUT /api/speeches/:id/text': (db, { id }, body) => repo.setSpeechText(db, id, parse(speechTextFields, body).body),
   'DELETE /api/speeches/:id': (db, { id }) => repo.removeSpeech(db, id),
+  // Attending guests with public details only: what the speech writer is allowed to see.
+  'GET /api/guests/public': (db) => repo.listPublicGuests(db),
 };
 
 async function readBody(req: IncomingMessage): Promise<unknown> {
@@ -44,8 +58,8 @@ function send(res: ServerResponse, status: number, body?: unknown): void {
 export function createApi(db: DatabaseSync): Server {
   return createServer(async (req, res) => {
     const path = new URL(req.url ?? '/', 'http://localhost').pathname;
-    const idMatch = path.match(/^(\/api\/[a-z]+)\/(\d+)$/);
-    const key = `${req.method} ${idMatch ? `${idMatch[1]}/:id` : path}`;
+    const idMatch = path.match(/^(\/api\/[a-z]+)\/(\d+)(\/[a-z]+)?$/);
+    const key = `${req.method} ${idMatch ? `${idMatch[1]}/:id${idMatch[3] ?? ''}` : path}`;
     const handler = routes[key];
     if (!handler) return send(res, 404, { error: `no route ${req.method} ${path}` });
     try {
