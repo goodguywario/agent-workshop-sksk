@@ -43,7 +43,22 @@ async function fetchProgress(): Promise<Partial<Record<ViewId, boolean>>> {
 export function App() {
   const [view, setView] = useState<ViewId>(currentView);
   const { data: event } = usePoll(api.getEvent, 5000);
-  const { data: progress, error } = usePoll(fetchProgress);
+  const { data: progress, error, refresh: refreshProgress } = usePoll(fetchProgress);
+  const [clearing, setClearing] = useState(false);
+  const hasPlan = progress !== undefined && Object.values(progress).some(Boolean);
+
+  const clearPlan = async () => {
+    if (!window.confirm('Clear the generated plan (seating, menu, playlist, invitation)? Event settings and guests are kept.')) return;
+    setClearing(true);
+    try {
+      await api.clearPlan();
+      refreshProgress();
+    } catch (err) {
+      window.alert(`Couldn't clear the plan: ${(err as Error).message}`);
+    } finally {
+      setClearing(false);
+    }
+  };
 
   useEffect(() => {
     const onHash = () => setView(currentView());
@@ -86,6 +101,12 @@ export function App() {
           </ul>
         </nav>
         {error && <p className="sidebar-error" role="alert">Can't reach the API. Is <code>npm run dev</code> running?</p>}
+        <div className="sidebar-footer">
+          <button type="button" className="sidebar-reset" onClick={clearPlan} disabled={!hasPlan || clearing}
+            title={hasPlan ? 'Clear seating, menu, playlist and invitation. Keeps settings and guests.' : 'Nothing planned yet'}>
+            {clearing ? 'Clearing…' : 'Clear plan'}
+          </button>
+        </div>
       </aside>
       <main className="content">{VIEWS.find((v) => v.id === view)!.render()}</main>
     </div>
