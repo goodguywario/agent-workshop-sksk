@@ -104,7 +104,8 @@ function declaredColumns(ddl: string): Map<string, Map<string, string>> {
   ).all() as { name: string; sql: string }[];
   scratch.close();
   return new Map(tables.map(({ name, sql }) => {
-    const body = sql.slice(sql.indexOf('(') + 1, sql.lastIndexOf(')'));
+    const body = sql.slice(sql.indexOf('(') + 1, sql.lastIndexOf(')'))
+      .replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, ''); // SQLite keeps comments in sqlite_master
     const columns = splitTopLevel(body)
       .filter((def) => !TABLE_CONSTRAINT.test(def))
       .map((def) => [def.split(/\s+/)[0].replace(/^["`[]|["`\]]$/g, ''), def] as [string, string]);
