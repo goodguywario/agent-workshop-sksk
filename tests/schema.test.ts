@@ -30,3 +30,15 @@ test('explains what to do when a column cannot be added', () => {
   expect(() => addMissingColumns(db, 'CREATE TABLE t (id INTEGER PRIMARY KEY, speech TEXT NOT NULL)'))
     .toThrow(/t\.speech.*DEFAULT.*data\/ folder/);
 });
+
+test('ignores SQL comments inside a table definition', () => {
+  const db = new DatabaseSync(':memory:');
+  db.exec('CREATE TABLE t (id INTEGER PRIMARY KEY)');
+  addMissingColumns(db, `CREATE TABLE t (
+    id INTEGER PRIMARY KEY,
+    -- a comment, with a comma
+    version INTEGER NOT NULL DEFAULT 1, /* block, comment */
+    label TEXT
+  )`);
+  expect((db.prepare('PRAGMA table_info(t)').all() as { name: string }[]).map((c) => c.name)).toEqual(['id', 'version', 'label']);
+});
